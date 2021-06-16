@@ -1034,11 +1034,11 @@ class Certificates(AuthenticatedResource):
                 )
 
         notify = data.get("notify")
-        if notify:
+        if notify is not None:
             cert = service.update_notify(cert, notify)
 
         rotate = data.get("rotation")
-        if rotate:
+        if rotate is not None:
             cert = service.update_rotation(cert, rotate)
 
         log_service.create(g.current_user, "update_cert", certificate=cert)
