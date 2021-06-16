@@ -209,6 +209,7 @@ class CertificatesNameQuery(AuthenticatedResource):
                         "id": 2
                     },
                     "active": true,
+                    "rotation": true,
                     "domains": [{
                         "sensitive": false,
                         "id": 1090,
@@ -242,6 +243,7 @@ class CertificatesNameQuery(AuthenticatedResource):
         parser.add_argument("owner", type=inputs.boolean, location="args")
         parser.add_argument("id", type=str, location="args")
         parser.add_argument("active", type=inputs.boolean, location="args")
+        parser.add_argument("rotation", type=inputs.boolean, location="args")
         parser.add_argument(
             "destinationId", type=int, dest="destination_id", location="args"
         )
@@ -931,21 +933,22 @@ class Certificates(AuthenticatedResource):
     @validate_schema(certificate_edit_input_schema, certificate_output_schema)
     def post(self, certificate_id, data=None):
         """
-        .. http:post:: /certificates/1/update/notify
+        .. http:post:: /certificates/1/update/switches
 
-           Update certificate notification
+           Update certificate switches: notification or rotation.
 
            **Example request**:
 
            .. sourcecode:: http
 
-              POST /certificates/1/update/notify HTTP/1.1
+              POST /certificates/1/update/switches HTTP/1.1
               Host: example.com
               Accept: application/json, text/javascript
               Content-Type: application/json;charset=UTF-8
 
               {
-                 "notify": false
+                 "notify": false,  # optional
+                 "rotation": false  # optional
               }
 
            **Example response**:
@@ -980,6 +983,7 @@ class Certificates(AuthenticatedResource):
                 "description": null,
                 "deleted": null,
                 "notify": false,
+                "rotation": false,
                 "notifications": [{
                     "id": 1
                 }]
@@ -1029,7 +1033,14 @@ class Certificates(AuthenticatedResource):
                     403,
                 )
 
-        cert = service.update_notify(cert, data.get("notify"))
+        notify = data.get("notify")
+        if notify:
+            cert = service.update_notify(cert, notify)
+
+        rotate = data.get("rotation")
+        if rotate:
+            cert = service.update_rotation(cert, rotate)
+
         log_service.create(g.current_user, "update_cert", certificate=cert)
         return cert
 
@@ -1516,7 +1527,7 @@ api.add_resource(
     Certificates, "/certificates/<int:certificate_id>", endpoint="certificate"
 )
 api.add_resource(
-    Certificates, "/certificates/<int:certificate_id>/update/notify", endpoint="certificateUpdateNotify"
+    Certificates, "/certificates/<int:certificate_id>/update/switches", endpoint="certificateUpdateSwitches"
 )
 api.add_resource(CertificatesStats, "/certificates/stats", endpoint="certificateStats")
 api.add_resource(

@@ -338,6 +338,17 @@ def update_notify(cert, notify_flag):
     return database.update(cert)
 
 
+def update_rotation(cert, rotation_flag):
+    """
+    Toggle rotation value which is a boolean
+    :param rotation_flag: new rotation value
+    :param cert: Certificate object to be updated
+    :return:
+    """
+    cert.rotation = rotation_flag
+    return database.update(cert)
+
+
 def create_certificate_roles(**kwargs):
     # create a role for the owner and assign it
     owner_role = role_service.get_or_create(
@@ -534,6 +545,8 @@ def render(args):
             )
         elif "notify" in filt:
             query = query.filter(Certificate.notify == truthiness(terms[1]))
+        elif "rotation" in filt:
+            query = query.filter(Certificate.rotation == truthiness(terms[1]))
         elif "active" in filt:
             query = query.filter(Certificate.active == truthiness(terms[1]))
         elif "cn" in terms:

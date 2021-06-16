@@ -1097,6 +1097,30 @@ def test_certificate_post_update_notify(client, certificate, token, status):
 @pytest.mark.parametrize(
     "token,status",
     [
+        (VALID_USER_HEADER_TOKEN, 403),
+        (VALID_ADMIN_HEADER_TOKEN, 200),
+        (VALID_ADMIN_API_TOKEN, 200),
+        ("", 401),
+    ],
+)
+def test_certificate_post_update_notify(client, certificate, token, status):
+    # negate the current rotation flag and pass it to update POST call to flip the rotation
+    toggled_rotation = not certificate.rotation
+
+    response = client.post(
+        api.url_for(Certificates, certificate_id=certificate.id),
+        data=json.dumps({"rotation": toggled_rotation}),
+        headers=token
+    )
+
+    assert response.status_code == status
+    if status == 200:
+        assert response.json.get("rotation") == toggled_rotation
+
+
+@pytest.mark.parametrize(
+    "token,status",
+    [
         (VALID_USER_HEADER_TOKEN, 400),
         (VALID_ADMIN_HEADER_TOKEN, 400),
         (VALID_ADMIN_API_TOKEN, 400),
