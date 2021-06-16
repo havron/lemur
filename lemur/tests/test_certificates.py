@@ -1103,7 +1103,7 @@ def test_certificate_post_update_notify(client, certificate, token, status):
         ("", 401),
     ],
 )
-def test_certificate_post_update_notify(client, certificate, token, status):
+def test_certificate_post_update_rotation(client, certificate, token, status):
     # negate the current rotation flag and pass it to update POST call to flip the rotation
     toggled_rotation = not certificate.rotation
 
