@@ -51,6 +51,12 @@ from lemur.policies.models import RotationPolicy
 from lemur.utils import Vault
 
 
+def ensure_newline(s):
+    if s.endswith('\n'):
+        return s
+    return s + '\n'
+
+
 def get_sequence(name):
     if "-" not in name:
         return name, None
@@ -490,9 +496,9 @@ def update_destinations(target, value, initiator):
         if target.private_key or not destination_plugin.requires_key:
             destination_plugin.upload(
                 target.name,
-                target.body,
-                target.private_key,
-                target.chain,
+                ensure_newline(target.body),
+                ensure_newline(target.private_key),
+                ensure_newline(target.chain),
                 value.options,
             )
             status = SUCCESS_METRIC_STATUS
